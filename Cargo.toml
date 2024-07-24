@@ -1,0 +1,92 @@
+[workspace]
+members = []
+
+[package]
+version      = "0.0.0"
+name         = "oxc_strip_types"
+authors      = ["Dunqing <dengqing0821@gmail.com>"]
+categories   = ["development-tools"]
+description  = "ESM / CJS module resolution"
+edition      = "2021"
+homepage     = "https://github.com/Dunqing/oxc-strip-types"
+keywords     = ["typescript", "strip-types"]
+license      = "MIT"
+readme       = "README.md"
+repository   = "https://github.com/Dunqing/oxc-strip-types"
+rust-version = "1.70"
+include      = ["/src", "/examples"]
+
+[lib]
+doctest = false
+
+
+[lints.clippy]
+all   = { level = "warn", priority = -1 }
+cargo = { level = "warn", priority = -1 }
+# restriction
+dbg_macro     = "warn"
+todo          = "warn"
+unimplemented = "warn"
+# I like the explicitness of this rule as it removes confusion around `clone`.
+# This increases readability, avoids `clone` mindlessly and heap allocating on accident.
+clone_on_ref_ptr = "warn"
+# These two are mutually exclusive, I like `mod.rs` files for better fuzzy searches on module entries.
+self_named_module_files         = "warn" # "-Wclippy::mod_module_files"
+empty_drop                      = "warn"
+empty_structs_with_brackets     = "warn"
+exit                            = "warn"
+filetype_is_file                = "warn"
+get_unwrap                      = "warn"
+impl_trait_in_params            = "warn"
+rc_buffer                       = "warn"
+rc_mutex                        = "warn"
+rest_pat_in_fully_bound_structs = "warn"
+unnecessary_safety_comment      = "warn"
+undocumented_unsafe_blocks      = "warn"
+# I want to write the best Rust code so both pedantic and nursery is enabled.
+# We should only disable rules globally if they are either false positives, chaotic, or does not make sense.
+nursery  = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+# Allowed rules
+# pedantic
+# This rule is too pedantic, I don't want to force this because naming things are hard.
+module_name_repetitions = "allow"
+# All triggers are mostly ignored in our codebase, so this is ignored globally.
+struct_excessive_bools = "allow"
+too_many_lines         = "allow"
+# #[must_use] is creating too much noise for this codebase, it does not add much value except nagging
+# the programmer to add a #[must_use] after clippy has been run.
+# Having #[must_use] every where also hinders readability.
+must_use_candidate = "allow"
+# used_underscore_binding= "allow"
+doc_markdown = "allow"
+# nursery
+# `const` functions do not make sense for our project because this is not a `const` library.
+# This rule also confuses new comers and forces them to add `const` blindlessly without any reason.
+missing_const_for_fn = "allow"
+
+[[example]]
+name = "stripe_types"
+
+[dependencies]
+oxc = { version = "0.22.0" }
+
+[dev-dependencies]
+
+[features]
+default = []
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+# For napi
+[profile.release]
+# Configurations explicitly listed here for clarity.
+# Using the best options for performance.
+opt-level     = 3
+lto           = "fat"
+codegen-units = 1
+strip         = "symbols" # set to `false` for debug information
+debug         = false     # set to `true` for debug information
+panic         = "abort"   # Let it crash and force ourselves to write safe Rust.
